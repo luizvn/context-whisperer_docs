@@ -1,0 +1,79 @@
+erDiagram
+    %% Relacionamentos do Fluxo de Geração
+    USERS ||--o{ REQUISITIONS : "cria (prompt)"
+    REQUISITIONS ||--o{ SCOPE_PROPOSALS : "possui (HITL)"
+    REQUISITIONS ||--o{ ARTIFACTS : "gera (Documentos)"
+    
+    %% Relacionamentos do RAG Determinístico e Avaliação
+    TEMPLATES ||--o{ ARTIFACTS : "molda a estrutura de"
+    CONSTRAINTS ||--o{ EVALUATION_LOGS : "fundamenta a falha em"
+    ARTIFACTS ||--o{ EVALUATION_LOGS : "recebe avaliações do Juiz"
+
+    USERS {
+        uuid id PK
+        string name
+        string email
+        timestamp created_at
+    }
+
+    REQUISITIONS {
+        uuid id PK
+        uuid user_id FK
+        text original_prompt
+        string status "Ex: AWAITING_SCOPE, GENERATING, COMPLETED"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    SCOPE_PROPOSALS {
+        uuid id PK
+        uuid requisition_id FK
+        text content_md
+        string status "Ex: PENDING, APPROVED, REJECTED"
+        text user_feedback
+        timestamp created_at
+    }
+
+    TEMPLATES {
+        uuid id PK
+        string name
+        string target_document "Ex: 2_Arquitetura.md"
+        text content_md
+    }
+
+    CONSTRAINTS {
+        uuid id PK
+        string category "Ex: SINTAXE_MERMAID, ARQUITETURA_LIMPA"
+        string rule_description
+        text rule_content
+        boolean is_active
+    }
+
+    ARTIFACTS {
+        uuid id PK
+        uuid requisition_id FK
+        uuid template_id FK
+        string artifact_type "Ex: REQUIREMENTS, ARCHITECTURE_DOC, UML_DIAGRAM, AGENT_CONFIG"
+        string file_name
+        text generated_content "O texto Markdown ou script UML gerado"
+        string status "Ex: DRAFT, APPROVED, REJECTED"
+        int iteration_count "Quantas vezes este arquivo foi refatorado"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    EVALUATION_LOGS {
+        uuid id PK
+        uuid artifact_id FK
+        uuid constraint_id FK
+        int iteration_number "A qual tentativa do Drafter esta avaliação se refere"
+        text judge_prompt "O prompt exato formatado e enviado ao Juiz"
+        text raw_judge_response "A resposta bruta/JSON retornada pela API"
+        boolean is_approved "Verdadeiro se passou, Falso se feriu a regra"
+        text causal_feedback "A crítica extraída para mandar o Drafter corrigir"
+        
+        %% NOVO CAMPO ADICIONADO AQUI:
+        json global_state_snapshot "Ex: { requirements: 'NOT_SENT', uml: 'APPROVED', arch: 'REJECTED' }"
+        
+        timestamp evaluated_at
+    }
