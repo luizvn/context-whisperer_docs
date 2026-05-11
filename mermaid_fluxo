@@ -1,0 +1,56 @@
+graph TD
+    User([Usuário: Solicita MVP]) --> State(Grafo de Estado Compartilhado)
+    
+    %% ==========================================
+    %% FASE 1: NEGÓCIO E APROVAÇÃO (O NOVO AGENTE)
+    %% ==========================================
+    State --> ScopeAgent[Agente: Analisador de Escopo]
+    
+    ScopeAgent -->|Gera Proposta de Escopo| HITL{Aprovação Humana}
+    HITL -->|Rejeita / Solicita Ajustes| ScopeAgent
+    
+    %% ==========================================
+    %% FASE 2: ORQUESTRAÇÃO DE ENGENHARIA
+    %% ==========================================
+    HITL -->|Escopo Aprovado| Coordinator[Agente: Coordenador Tech Lead]
+    
+    subgraph GeracaoEspecializada [Geração Especializada]
+        ReqDrafter[Agente: Requisitos]
+        ArchDrafter[Agente: Arquitetura]
+        UALDrafter[Agente: Diagramador UML]
+    end
+    
+    Coordinator -->|Distribui Tarefas| ReqDrafter
+    Coordinator -->|Distribui Tarefas| ArchDrafter
+    Coordinator -->|Distribui Tarefas| UALDrafter
+    
+    %% Retorno dos artefatos para a memória do grafo
+    ReqDrafter --> State
+    ArchDrafter --> State
+    UALDrafter --> State
+    
+    %% ==========================================
+    %% FASE 3: AVALIAÇÃO E FEEDBACK CAUSAL
+    %% ==========================================
+    State --> Judge[Agente: Juiz Restritivo]
+    
+    Judge -->|Avaliação Causal| Decisao{Faltam restrições?}
+    Decisao -->|Erros Encontrados| Supervisor[Agente: Resolvedor]
+    
+    %% Retorno do erro: O Supervisor avisa o Tech Lead (Coordinator), 
+    %% que decide qual Drafter precisa consertar o erro.
+    Supervisor -->|Delega Correção| Coordinator
+    
+    %% ==========================================
+    %% FASE 4: FINALIZAÇÃO
+    %% ==========================================
+    Decisao -->|100% Aprovado| AgentGen[Agente: Gerador de agents.md]
+    AgentGen --> Fim([Fim: Repositório Documentado])
+
+    %% Estilização visual
+    style HITL fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    style Judge fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#000
+    style Decisao fill:#ffcccc,stroke:#c62828,stroke-width:2px,color:#000
+    style AgentGen fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#000
+    style ScopeAgent fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px,color:#000
+    style Coordinator fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px,color:#000
