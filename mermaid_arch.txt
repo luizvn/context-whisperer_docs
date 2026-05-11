@@ -1,0 +1,78 @@
+graph TD
+    %% ==========================================
+    %% CAMADA DE APRESENTAÇÃO
+    %% ==========================================
+    subgraph Presentation_Layer [Camada de Apresentação]
+        direction LR
+        UI[Interface de Usuário]
+        HITL_Module[Módulo de Validação Humana - HITL]
+    end
+
+    %% ==========================================
+    %% CAMADA DE ORQUESTRAÇÃO
+    %% ==========================================
+    subgraph Orchestration_Layer [Camada de Orquestração]
+        direction TB
+        LG_Engine[Motor LangGraph - State Machine]
+        Graph_State[Estado do Grafo - Memória de Curto Prazo]
+    end
+
+    %% ==========================================
+    %% CAMADA DE AGENTES (INTELIGÊNCIA)
+    %% ==========================================
+    subgraph Agent_Layer [Camada de Agentes - LLMs]
+        direction TB
+        Scope_Node[Nó: Analisador de Escopo]
+        Coord_Node[Nó: Coordenador / Tech Lead]
+        Drafter_Nodes[Nós: Especialistas de Síntese]
+        Judge_Node[Nó: Juiz Restritivo]
+        Super_Node[Nó: Supervisor / Resolvedor]
+    end
+
+    %% ==========================================
+    %% CAMADA DE CONTEXTO (RAG DETERMINÍSTICO)
+    %% ==========================================
+    subgraph Context_Layer [Engenharia de Contexto - RAG]
+        direction LR
+        Rule_Injector[Injetor de Regras e Templates]
+        Selector[Seletor de Metadados]
+    end
+
+    %% ==========================================
+    %% CAMADA DE DADOS
+    %% ==========================================
+    subgraph Data_Layer [Camada de Dados - PostgreSQL]
+        DB[(PostgreSQL)]
+        Rules_Repo[Repositório de Regras e Constraints]
+        Artifact_Repo[Persistência de Artefatos e Logs]
+    end
+
+    %% ==========================================
+    %% RELACIONAMENTOS E FLUXO DE DADOS
+    %% ==========================================
+    
+    %% Comunicação entre camadas
+    UI <--> LG_Engine
+    HITL_Module <--> LG_Engine
+    LG_Engine --- Graph_State
+    
+    LG_Engine <--> Agent_Layer
+    
+    %% Fluxo de RAG e Dados
+    Agent_Layer <--> Rule_Injector
+    Rule_Injector --- Selector
+    Selector <--> Rules_Repo
+    
+    LG_Engine <--> Artifact_Repo
+    Artifact_Repo --- DB
+    Rules_Repo --- DB
+
+    %% Interação Externa
+    Agent_Layer -.->|API Calls| LLM_Providers[Provedores de LLM - OpenAI/Anthropic/Gemini]
+
+    %% Estilização
+    style Presentation_Layer fill:#f9f9f9,stroke:#333,stroke-dasharray: 5 5
+    style Orchestration_Layer fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px
+    style Agent_Layer fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px
+    style Context_Layer fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Data_Layer fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
