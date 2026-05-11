@@ -1,0 +1,64 @@
+flowchart LR
+    %% ==========================================
+    %% ATORES (HUMANO E AGENTES DA IA)
+    %% ==========================================
+    User(("👤 Usuário\n(Humano)"))
+    
+    ScopeAgent(("🤖 Agente:\nAnalisador\nde Escopo"))
+    Coordinator(("🤖 Agente:\nCoordenador"))
+    Drafters(("🤖 Agentes:\nEspecialistas\n(Drafters)"))
+    Judge(("⚖️ Agente:\nJuiz Restritivo"))
+    Supervisor(("🛠️ Agente:\nResolvedor"))
+    AgentGen(("⚙️ Agente:\nGerador\n(agents.md)"))
+
+    %% ==========================================
+    %% FRONTEIRA DO SISTEMA E CASOS DE USO
+    %% ==========================================
+    subgraph Orquestrador ["Orquestrador de Agentes (Fases do Fluxo)"]
+        direction TB
+        
+        UC1(["Solicitar MVP"])
+        UC2(["Gerar Proposta de Escopo"])
+        UC3(["Validar Escopo (HITL)"])
+        UC4(["Distribuir Tarefas de Engenharia"])
+        UC5(["Elaborar Artefatos (Req, Arch, UML)"])
+        UC6(["Realizar Avaliação Causal"])
+        UC7(["Delegar Correção de Erros"])
+        UC8(["Gerar Configuração de Agentes"])
+    end
+
+    %% ==========================================
+    %% ASSOCIAÇÕES SIMPLES (QUEM FAZ O QUE)
+    %% ==========================================
+    
+    %% Fase 1: Negócio e Aprovação
+    User --- UC1
+    User --- UC3
+    ScopeAgent --- UC2
+    
+    %% Fase 2: Orquestração de Engenharia
+    Coordinator --- UC4
+    Drafters --- UC5
+    
+    %% Fase 3: Avaliação e Feedback Causal
+    Judge --- UC6
+    Supervisor --- UC7
+    
+    %% A delegação de erro volta para o Coordenador no fluxo
+    Coordinator --- UC7 
+    
+    %% Fase 4: Finalização
+    AgentGen --- UC8
+
+    %% ==========================================
+    %% ESTILIZAÇÃO
+    %% ==========================================
+    classDef human fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000;
+    classDef agent fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px,color:#000;
+    classDef usecase fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#000;
+    classDef system fill:#fafafa,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5;
+    
+    class User human;
+    class ScopeAgent,Coordinator,Drafters,Judge,Supervisor,AgentGen agent;
+    class UC1,UC2,UC3,UC4,UC5,UC6,UC7,UC8 usecase;
+    class Orquestrador system;
